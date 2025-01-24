@@ -1,5 +1,8 @@
+using System.Reflection;
 using BlazorProject.Client.Pages;
 using BlazorProject.Components;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddControllers();
+var connectionString = builder.Configuration.GetConnectionString("MyConstr") ?? throw new InvalidOperationException("Connection string 'AppDBContextConnection' not found.");
+ 
+  builder.Services.AddDbContext<AppDbContext>(options =>
+
+      options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();      
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,7 +32,7 @@ else
 
 app.UseStaticFiles();
 app.UseAntiforgery();
-
+app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorProject.Client._Imports).Assembly);
