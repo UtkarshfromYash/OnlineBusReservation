@@ -100,7 +100,7 @@
         try
         {
             _isSaving = true;
-            var response = await Http.PostAsJsonAsync("api/User", _addUserModel);
+            var response = await Http.PostAsJsonAsync("api/User/register", _addUserModel);
             
             if (response.IsSuccessStatusCode)
             {

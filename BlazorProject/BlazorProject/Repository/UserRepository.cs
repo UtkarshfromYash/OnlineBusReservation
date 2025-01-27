@@ -36,24 +36,43 @@ public class UserRepository : IUserRepository
         return model;
     }
 
-    public Task<User> DeleteUser(int userId)
+    public async Task<bool> DeleteUser(int userId)
     {
-        throw new NotImplementedException();
+        var user=await _context.Users.FindAsync(userId);
+        if(user!=null){
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        return false;
     }
 
-    public Task<User> GetUser(int userId)
+    public async Task<User> GetUser(int userId)
     {
-        throw new NotImplementedException();
+        var user= await _context.Users.FirstOrDefaultAsync(x=>x.UserId==userId);
+        return user;
     }
 
-    public Task<IEnumerable<User>> GetUsers()
+    public async Task<IEnumerable<User>> GetUsers()
     {
-        throw new NotImplementedException();
+        var users=await _context.Users.ToListAsync();
+        return users;
     }
 
-    public Task<AddUpdateModel> UpdateUser(AddUpdateModel user)
+    public async Task<AddUpdateModel> UpdateUser(int id,AddUpdateModel user)
     {
-        throw new NotImplementedException();
+        var existuser=await _context.Users.FindAsync(id);
+        if(existuser!=null){
+            existuser.FirstName=user.FirstName;
+            existuser.LastName=user.LastName;
+            existuser.Email=user.Email;
+            existuser.Password=user.Password;
+            existuser.ContactNo=user.ContactNo;
+            existuser.Address=user.Address;
+            existuser.DateofBirth=user.DateofBirth;
+    }
+        await _context.SaveChangesAsync();
+        return user;
     }
     public async Task<User> LoginUser(LoginModel loginModel)
     {
