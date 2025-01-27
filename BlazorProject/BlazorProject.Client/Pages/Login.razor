@@ -155,6 +155,7 @@
                 if (user != null)
                 {
                     await JSRuntime.InvokeVoidAsync("alert", "Login Successful");
+                    JSRuntime.InvokeVoidAsync("localStorage.setItem", "user", user);
                      NavigationManager.NavigateTo("/mydashboard"); 
                 }
                 else
