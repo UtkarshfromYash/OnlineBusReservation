@@ -1,0 +1,91 @@
+@page "/bus-search"
+@using BlazorProject.Models.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+<div class="container mt-4">
+    <h2>Search Buses</h2>
+    
+    <EditForm Model="@searchModel" OnValidSubmit="@HandleSearch">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>From</label>
+                    <InputText @bind-Value="searchModel.Source" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>To</label>
+                    <InputText @bind-Value="searchModel.Destination" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary mt-4">Search</button>
+            </div>
+        </div>
+    </EditForm>
+
+    @if (busSchedules != null)
+    {
+        @if (busSchedules.Any())
+        {
+            <div class="table-responsive mt-4">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Bus</th>
+                            <th>Type</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Seats</th>
+                            <th>Fare</th>
+                            <th>Duration</th>
+                            <th>Features</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bus in busSchedules)
+                        {
+                            <tr>
+                                <td>@bus.BusName</td>
+                                <td>@bus.BusType</td>
+                                <td>@bus.DepartureTimeFormatted</td>
+                                <td>@bus.ArrivalTimeFormatted</td>
+                                <td>@bus.AvailableSeats/@bus.TotalSeats</td>
+                                <td>@bus.FareFormatted</td>
+                                <td>@bus.JourneyDuration</td>
+                                <td>@bus.Features</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-4">
+                No buses found for the selected route.
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private BusScheduleSearchModel searchModel = new();
+    private IEnumerable<BusScheduleViewModel> busSchedules;
+    
+    private async Task HandleSearch()
+    {
+        busSchedules = await Http.GetFromJsonAsync<IEnumerable<BusScheduleViewModel>>($"api/BusSchedule?source={searchModel.Source}&destination={searchModel.Destination}");
+    }
+
+    @* private void NavigateToBooking(BusSearchViewModel bus)
+    {
+        // Implement navigation logic
+    } *@
+}
