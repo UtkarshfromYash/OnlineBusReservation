@@ -1,0 +1,64 @@
+@page "/search"
+@using System
+@using System.ComponentModel.DataAnnotations
+
+<EditForm Model="@searchModel" OnValidSubmit="HandleSearch">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="card p-4 shadow-lg">
+        <h3 class="text-center mb-4">Find a Bus</h3>
+
+        <div class="mb-3">
+            <label for="source" class="form-label">Source</label>
+            <InputText id="source" class="form-control" @bind-Value="searchModel.Source" placeholder="Enter source location" />
+        </div>
+
+        <div class="mb-3">
+            <label for="destination" class="form-label">Destination</label>
+            <InputText id="destination" class="form-control" @bind-Value="searchModel.Destination" placeholder="Enter destination location" />
+        </div>
+
+        <div class="mb-3">
+            <label for="fromDate" class="form-label">From Date</label>
+            <InputDate id="fromDate" class="form-control" @bind-Value="searchModel.FromDate" />
+        </div>
+
+        <div class="mb-3">
+            <label for="toDate" class="form-label">To Date</label>
+            <InputDate id="toDate" class="form-control" @bind-Value="searchModel.ToDate" />
+        </div>
+
+        <div class="mb-3">
+            <label for="fromTime" class="form-label">From Time</label>
+            @* <InputTime id="fromTime" class="form-control" @bind-Value="searchModel.FromTime" /> *@
+        </div>
+
+        <div class="mb-3">
+            <label for="toTime" class="form-label">To Time</label>
+            @* <InputTime id="toTime" class="form-control" @bind-Value="searchModel.ToTime" /> *@
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+</EditForm>
+
+@code {
+    private BusSearchModel searchModel = new BusSearchModel();
+
+    private void HandleSearch()
+    {
+        // Add logic to handle search functionality
+        Console.WriteLine($"Searching for buses from {searchModel.Source} to {searchModel.Destination}");
+    }
+
+    public class BusSearchModel
+    {
+        public string? Source { get; set; }
+        public string? Destination { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public TimeSpan FromTime { get; set; }
+        public TimeSpan ToTime { get; set; }
+    }
+}

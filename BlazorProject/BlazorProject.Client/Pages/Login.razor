@@ -6,38 +6,137 @@
 @inject IJSRuntime JSRuntime
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
 
-<div class="container mt-5">
+<section style="background-image: url('images/login.jfif'); background-size: cover;">
+<div class="login-container">
     <div class="form-container">
-        <h2>Log In</h2>
+        <h2 class="text-center mb-4">Log In</h2>
         <EditForm Model="@_login" OnSubmit="Submit">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="form-group mb-3">
+            <div class="form-group mb-4">
                 <label for="email">Email</label>
                 <InputText id="email" class="form-control" @bind-Value="_login.Email" />
                 <ValidationMessage For="@(() => _login.Email)" />
             </div>
 
-            <div class="form-group mb-3">
+            <div class="form-group mb-4">
                 <label for="password">Password</label>
                 <InputText type="password" id="password" class="form-control" @bind-Value="_login.Password" />
                 <ValidationMessage For="@(() => _login.Password)" />
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
         </EditForm>
-        <a href="#">Forgot your password?</a>
+
+        <div class="text-center mt-3">
+            <a href="#" class="forgot-password-link">Forgot your password?</a>
+        </div>
     </div>
 </div>
 
-<footer>
-    <p>
-        Created with <i class="fa fa-heart"></i> by
-        <a target="_blank" href="https://florin-pop.com">Florin Pop</a>
-        - Read how I created this and how you can join the challenge
-        <a target="_blank" href="https://www.florin-pop.com/blog/2019/03/double-slider-sign-in-up-form/">here</a>.
-    </p>
-</footer>
+</section>
+
+<style>
+    /* Global body styles */
+    body {
+        background-color: #f4f7fc; /* Soft light background */
+        font-family: 'Arial', sans-serif;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    /* Login container */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+    }
+
+    .form-container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+    }
+
+    /* Form header */
+    .form-container h2 {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    /* Label styling */
+    .form-group label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+    }
+
+    /* Input fields */
+    .form-control {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        color: #333;
+        font-size: 16px;
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #0066cc;
+        box-shadow: 0 0 8px rgba(0, 102, 204, 0.2);
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: #0066cc;
+        border: 1px solid #0066cc;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background-color: #005bb5;
+    }
+
+    /* Forgot password link */
+    .forgot-password-link {
+        font-size: 14px;
+        color: #0066cc;
+        text-decoration: none;
+    }
+
+    .forgot-password-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Validation message styling */
+    .validation-message {
+        color: #f44336;
+        font-size: 14px;
+    }
+</style>
+
 
 @code {
     private LoginModel _login = new LoginModel();
@@ -57,7 +156,7 @@
                 {
                     await JSRuntime.InvokeVoidAsync("alert", "Login Successful");
                     JSRuntime.InvokeVoidAsync("localStorage.setItem", "user", user);
-                    NavigationManager.NavigateTo("/");
+                     NavigationManager.NavigateTo("/mydashboard"); 
                 }
                 else
                 {
