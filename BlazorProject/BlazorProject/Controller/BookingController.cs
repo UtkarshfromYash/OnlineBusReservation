@@ -14,6 +14,7 @@ public class BookingController:ControllerBase
     [HttpPost]
     public async Task<ActionResult<Booking>> AddBooking(Booking booking)
     {
+        booking.BookingDate=DateTime.Now;
         var newBooking=await _bookingService.AddBooking(booking);
         if(ModelState.IsValid) return Ok(newBooking);
         else return BadRequest(ModelState);

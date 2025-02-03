@@ -1,0 +1,304 @@
+@page "/payment"
+@using Microsoft.JSInterop
+@using global::BlazorProject.Models.Models
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+<style>
+    @@media (max-width: 767px) {
+        ::deep .card {
+            margin: 3vh auto;
+        }
+        
+        ::deep .cart {
+            padding: 4vh;
+            border-bottom-left-radius: unset;
+            border-top-right-radius: 1rem;
+        }
+    }
+
+    body {
+        background: #ddd;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        font-family: sans-serif;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .card {
+        margin: auto;
+        max-width: 1200px; /* Increased width */
+        width: 700px; /* Maintain responsive width */
+        box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        border-radius: 1rem;
+        border: transparent;
+    }
+
+    .cart {
+        background-color: #fff;
+        padding: 4vh 5vh;
+        border-radius: 1rem; /* Ensure rounded corners */
+    }
+
+    .title b {
+        font-size: 1.5rem;
+    }
+
+    .main {
+        margin: 0;
+        padding: 2vh 0;
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 2vh;
+    }
+
+    label {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 0.5vh;
+    }
+
+    input, select {
+        border: 1px solid rgba(0, 0, 0, 0.137);
+        padding: 1.5vh 1vh;
+        margin-bottom: 2vh;
+        outline: none;
+        width: 100%;
+        background-color: rgb(247, 247, 247);
+    }
+
+    .btn {
+        background-color: #000;
+        border-color: #000;
+        color: white;
+        width: 100%;
+        font-size: 0.7rem;
+        margin-top: 4vh;
+        padding: 1vh;
+        border-radius: 0;
+    }
+
+    .btn:disabled {
+        background-color: #666;
+        border-color: #666;
+    }
+    .modal-confirm {		
+	color: #636363;
+	width: 325px;
+	font-size: 14px;
+}
+.modal-confirm .modal-content {
+	padding: 20px;
+	border-radius: 5px;
+	border: none;
+}
+.modal-confirm .modal-header {
+	border-bottom: none;   
+	position: relative;
+}
+.modal-confirm h4 {
+	text-align: center;
+	font-size: 26px;
+	margin: 30px 0 -15px;
+}
+.modal-confirm .form-control, .modal-confirm .btn {
+	min-height: 40px;
+	border-radius: 3px; 
+}
+.modal-confirm .close {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+}	
+.modal-confirm .modal-footer {
+	border: none;
+	text-align: center;
+	border-radius: 5px;
+	font-size: 13px;
+}	
+.modal-confirm .icon-box {
+	color: #fff;		
+	position: absolute;
+	margin: 0 auto;
+	left: 0;
+	right: 0;
+	top: -70px;
+	width: 95px;
+	height: 95px;
+	border-radius: 50%;
+	z-index: 9;
+	background: #82ce34;
+	padding: 15px;
+	text-align: center;
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+}
+.modal-confirm .icon-box i {
+	font-size: 58px;
+	position: relative;
+	top: 3px;
+}
+.modal-confirm.modal-dialog {
+	margin-top: 80px;
+}
+.modal-confirm .btn {
+	color: #fff;
+	border-radius: 4px;
+	background: #82ce34;
+	text-decoration: none;
+	transition: all 0.4s;
+	line-height: normal;
+	border: none;
+}
+.modal-confirm .btn:hover, .modal-confirm .btn:focus {
+	background: #6fb32b;
+	outline: none;
+}
+.trigger-btn {
+	display: inline-block;
+	margin: 100px auto;
+}
+</style>
+<script>
+    function showModal() {
+        $('#myModal').modal('show');
+    }
+</script>
+<div class="card mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-12 cart"> <!-- Changed to col-md-12 to take full width -->
+            <div class="title">
+                <div class="row">
+                    <div class="col"><h4 style="text-align: center;"><b>Payment Details</b></h4></div>
+                </div>
+            </div>
+            <EditForm Model="@payment" OnValidSubmit="@HandleValidSubmit" FormName="paymentForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="main">
+                    <!-- Booking ID -->
+                    <div class="form-group">
+                        @* <label>Booking ID</label> *@
+                        <InputNumber class="form-control" 
+                                   @bind-Value="payment.BookingID" 
+                                   readonly hidden/>
+                    </div>
+
+                    <!-- Payment Date -->
+                    <div class="form-group">
+                        <label>Payment Date</label>
+                        <InputDate class="form-control" 
+                                 @bind-Value="payment.PaymentDate" 
+                                 readonly />
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <InputNumber class="form-control" 
+                                   @bind-Value="payment.PaymentAmount" />
+                        <ValidationMessage For="@(() => payment.PaymentAmount)" />
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <InputSelect class="form-control" 
+                                   @bind-Value="payment.PaymentMethod">
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Cash">Cash</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => payment.PaymentMethod)" />
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label>Status</label>
+                        <InputSelect class="form-control" 
+                                   @bind-Value="payment.PaymentStatus">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Failed">Failed</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => payment.PaymentStatus)" />
+                    </div>
+
+                    <!-- Transaction ID -->
+                    <div class="form-group">
+                        <label>Transaction ID</label>
+                        <InputText class="form-control" 
+                                 @bind-Value="payment.TransactionID" readonly/>
+                        <ValidationMessage For="@(() => payment.TransactionID)" />
+                    </div>
+                    <button type="submit" class="btn" @onclick="HandleValidSubmit">
+                        Process Payment
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<!-- Modal HTML -->
+<div id="myModal" class="modal fade">
+	<div class="modal-dialog modal-confirm">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="icon-box">
+					<i class="material-icons">&#xE876;</i>
+				</div>				
+				<h4 class="modal-title w-100">Awesome!</h4>	
+			</div>
+			<div class="modal-body">
+				<p class="text-center">Your booking has been confirmed. Check your email for details.</p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-success btn-block" data-dismiss="modal">OK</button>
+			</div>
+		</div>
+	</div>
+</div>     
+@code {
+    private Payment payment = new Payment();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Get booking ID from session storage
+        @* var bookingId = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "bookingId");
+        payment.BookingID = int.Parse(bookingId); *@
+        payment.PaymentDate = DateTime.Now;
+        payment.TransactionID = generateTransactionID();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Add your payment processing logic here
+            
+            // Example: Call your payment service
+            // await PaymentService.ProcessPayment(payment);
+            
+            // Navigate to confirmation page after successful payment
+            @* await JSRuntime.InvokeVoidAsync("alert","Payment processed successfully!"); *@
+            await JSRuntime.InvokeVoidAsync("showModal");
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            // Handle payment processing errors
+            Console.WriteLine($"Payment processing error: {ex.Message}");
+        }
+    }
+    private string generateTransactionID(){
+        Random random = new Random();
+        string id="TXI"+random.Next(100000, 999999).ToString();
+        return id;
+    }
+}

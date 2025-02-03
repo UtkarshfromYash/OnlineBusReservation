@@ -5,6 +5,7 @@ namespace BlazorProject.Models.Models;
 [Keyless]
 public class BusScheduleViewModel
 {
+    public int ScheduleID {get;set;}
     public string Source { get; set; }
     public string Destination { get; set; }
     public decimal Distance { get; set; }
