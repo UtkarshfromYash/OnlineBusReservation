@@ -1,9 +1,12 @@
 @page "/login"
 @using BlazorProject.Models.Models
 @using System.Net.Http.Json
+@using System.Text.Json
+@using BlazorProject.Client.Services
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject LocalStorageService _localstorageservice
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
 
 <section style="background-image: url('images/login.jfif'); background-size: cover;">
@@ -155,8 +158,25 @@
                 if (user != null)
                 {
                     await JSRuntime.InvokeVoidAsync("alert", "Login Successful");
-                    JSRuntime.InvokeVoidAsync("localStorage.setItem", "user", user);
-                     NavigationManager.NavigateTo("/mydashboard"); 
+                    await _localstorageservice.SetItem("user", user);
+                    var pendingScheduleId = await _localstorageservice.GetItem<int>("pendingScheduleID");
+    
+                    if (pendingScheduleId != 0)
+                    {
+                        // Clear the pending ID
+                        await _localstorageservice.RemoveItem("pendingScheduleID");
+                        
+                        // Set the schedule ID for booking
+                        await _localstorageservice.SetItem<int>("scheduleID", pendingScheduleId);
+                        
+                        // Navigate to booking page
+                        NavigationManager.NavigateTo("/book-now");
+                    }
+                    else
+                    {
+                        // Normal login flow
+                        NavigationManager.NavigateTo("/mydashboard"); ;
+                    }
                 }
                 else
                 {

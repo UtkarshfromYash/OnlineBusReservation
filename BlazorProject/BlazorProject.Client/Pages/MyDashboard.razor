@@ -1,7 +1,11 @@
 @page "/mydashboard"
+@using BlazorProject.Client.Services
 @using BlazorProject.Models.Models
+@using System.Text.Json
 @inject NavigationManager NavigationManager
-
+@inject IJSRuntime JSRuntime
+@inject LocalStorageService _service;
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
 <div class="container">
     <!-- Header Section -->
     <header class="header">
@@ -12,16 +16,16 @@
 
             <!-- User Profile and Logout -->
             <div class="user-info">
-                @if (!string.IsNullOrEmpty(UserName))
-                {
-                    <span class="username">@UserName</span>
-                    <button class="btn-logout" @onclick="Logout">Logout</button>
-                }
-                else
-                {
-                    <span class="username">Guest</span>
-                }
-            </div>
+    @if (!string.IsNullOrEmpty(UserName))
+    {
+        <span class="username">@UserName</span>
+        <button class="btn-logout" @onclick="Logout">Logout</button>
+    }
+    else
+    {
+        <span class="username">Guest</span>
+    }
+</div>
         </nav>
     </header>
 
@@ -232,15 +236,44 @@
         background-color: #005bb5;
     }
 </style>
-
 @code {
-    // For simplicity, I'm using a static string for username. In real-world scenarios, this would be dynamic.
-    private string UserName = "John Doe";  // Replace with actual logic to fetch logged-in user's username.
-
-    private void Logout()
+ public string UserName { get; set; }
+ private User user = new User();
+  protected override async Task OnAfterRenderAsync(bool firstrender)
+{
+    if(firstrender)
+    {
+         @* await JSRuntime.InvokeVoidAsync("logLocalStorage"); // Log local storage value *@
+        var user = await logLocalStorage();
+        if (user!=null)
+        {
+            try
+            {
+                UserName = user.FirstName;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deserializing: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("User  JSON is null or empty.");
+        }
+    }
+    }
+private void Logout()
     {
         // Logic to log the user out (e.g., clear local storage, session, etc.)
         // After logout, redirect to the login page
         NavigationManager.NavigateTo("/login");
+    }
+
+    private async Task<User> logLocalStorage()
+    {
+        var user = await _service.GetItem<User>("user");
+        Console.WriteLine($"User: {JsonSerializer.Serialize(user)}");
+        return user;
     }
 }

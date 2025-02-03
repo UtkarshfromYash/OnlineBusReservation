@@ -18,4 +18,5 @@ public class AppDbContext:DbContext
         public DbSet<BusScheduleSearchModel> BusScheduleSearchModels { get; set; }
         public DbSet<BusScheduleViewModel> BusScheduleViewModels { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Payment> Payments{get; set;}
     }
